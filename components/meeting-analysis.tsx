@@ -3,14 +3,25 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { CheckCircle2, AlertTriangle, HelpCircle, AlertOctagon, Lightbulb, RefreshCw, Loader2 } from "lucide-react";
+import { CheckCircle2, AlertTriangle, HelpCircle, AlertOctagon, Lightbulb, RefreshCw, Loader2, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { TaskList } from "@/components/task-list";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { regenerateAnalysisAction } from "@/app/actions";
+import { regenerateAnalysisAction, deleteMeetingAction } from "@/app/actions";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 
 type AnalysisData = {
@@ -29,6 +40,7 @@ export function MeetingAnalysis({ meeting, tasks }: { meeting: any, tasks: any[]
     const analysis = meeting.analysis_json as AnalysisData;
 
     const [isRegenerating, setIsRegenerating] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     const router = useRouter();
 
     const handleRegenerate = async (focus: "executive" | "technical" | "tasks") => {
@@ -36,6 +48,17 @@ export function MeetingAnalysis({ meeting, tasks }: { meeting: any, tasks: any[]
         await regenerateAnalysisAction(meeting.id, focus);
         setIsRegenerating(false);
         router.refresh();
+    };
+
+    const handleDelete = async () => {
+        setIsDeleting(true);
+        const result = await deleteMeetingAction(meeting.id);
+        if (result.success) {
+            router.push("/dashboard");
+        } else {
+            setIsDeleting(false);
+            console.error(result.error);
+        }
     };
 
     if (!analysis) {
@@ -52,25 +75,51 @@ export function MeetingAnalysis({ meeting, tasks }: { meeting: any, tasks: any[]
                     <TabsTrigger value="transcript">Transcripción</TabsTrigger>
                 </TabsList>
 
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="sm" disabled={isRegenerating} className="gap-2">
-                            {isRegenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-                            Re-analizar
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleRegenerate("executive")}>
-                            Enfoque Ejecutivo
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleRegenerate("technical")}>
-                            Enfoque Técnico
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleRegenerate("tasks")}>
-                            Solo Tareas
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                <div className="flex gap-2">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm" disabled={isRegenerating || isDeleting} className="gap-2">
+                                {isRegenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                                Re-analizar
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleRegenerate("executive")}>
+                                Enfoque Ejecutivo
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleRegenerate("technical")}>
+                                Enfoque Técnico
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleRegenerate("tasks")}>
+                                Solo Tareas
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="destructive" size="sm" disabled={isDeleting} className="gap-2">
+                                {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                                Eliminar
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>¿Estás completamente seguro?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    Esta acción no se puede deshacer. Esto eliminará permanentemente el análisis
+                                    de la reunión y todas sus tareas asociadas de nuestros servidores.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                    Eliminar
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </div>
             </div>
 
             <TabsContent value="overview" className="space-y-4">

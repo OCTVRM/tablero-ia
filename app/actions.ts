@@ -275,3 +275,20 @@ export async function regenerateAnalysisAction(meetingId: string, focus: "execut
         return { error: "Error al regenerar análisis" };
     }
 }
+
+export async function deleteMeetingAction(meetingId: string) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) return { error: "Unauthorized" };
+
+    const { error } = await supabase.from("meetings").delete().eq("id", meetingId);
+
+    if (error) {
+        console.error("Delete Error:", error);
+        return { error: "Error al eliminar la reunión" };
+    }
+
+    revalidatePath("/dashboard");
+    return { success: true };
+}
