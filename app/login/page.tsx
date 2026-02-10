@@ -27,7 +27,8 @@ export default async function Login({
         });
 
         if (error) {
-            return redirect("/login?message=Could not authenticate user");
+            console.error("Login Error:", error.message, error.status);
+            return redirect(`/login?message=${encodeURIComponent(error.message)}`);
         }
 
         return redirect("/");
@@ -50,11 +51,11 @@ export default async function Login({
         });
 
         if (error) {
-            console.error(error);
-            return redirect("/login?message=Could not authenticate user");
+            console.error("SignUp Error:", error.message, error.status);
+            return redirect(`/login?message=${encodeURIComponent(error.message)}`);
         }
 
-        return redirect("/login?message=Check email to continue sign in process");
+        return redirect("/login?message=Revisa tu email para confirmar el registro");
     };
 
     // Note: For Google Auth, we'd need a client component or a server action that redirects to the provider URL.
