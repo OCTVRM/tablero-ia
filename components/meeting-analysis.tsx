@@ -72,6 +72,7 @@ export function MeetingAnalysis({ meeting, tasks }: { meeting: any, tasks: any[]
                     <TabsTrigger value="overview">Resumen & Ideas</TabsTrigger>
                     <TabsTrigger value="details">Detalles</TabsTrigger>
                     <TabsTrigger value="tasks">Tareas ({tasks.length})</TabsTrigger>
+                    <TabsTrigger value="minuta">Minuta</TabsTrigger>
                     <TabsTrigger value="transcript">Transcripción</TabsTrigger>
                 </TabsList>
 
@@ -240,6 +241,136 @@ export function MeetingAnalysis({ meeting, tasks }: { meeting: any, tasks: any[]
                 </Card>
             </TabsContent>
 
+            <TabsContent value="minuta">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Minuta de Reunión</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <ScrollArea className="h-[600px] w-full rounded-md p-4">
+                            <div className="space-y-6 font-sans">
+                                {/* Header */}
+                                <div className="border-b pb-4">
+                                    <h2 className="text-2xl font-bold mb-2">{meeting.title}</h2>
+                                    <p className="text-sm text-muted-foreground">
+                                        Fecha: {new Date(meeting.date).toLocaleDateString('es-ES', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric'
+                                        })}
+                                    </p>
+                                </div>
+
+                                {/* Participants */}
+                                <div>
+                                    <h3 className="text-lg font-semibold mb-2">Participantes</h3>
+                                    <ul className="list-disc pl-6 space-y-1">
+                                        {analysis.participants.map((p, i) => (
+                                            <li key={i} className="text-sm">{p}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+
+                                {/* Context */}
+                                <div>
+                                    <h3 className="text-lg font-semibold mb-2">Contexto</h3>
+                                    <p className="text-sm leading-relaxed">{analysis.context}</p>
+                                </div>
+
+                                {/* Main Idea */}
+                                <div>
+                                    <h3 className="text-lg font-semibold mb-2">Objetivo de la Reunión</h3>
+                                    <p className="text-sm leading-relaxed">{analysis.main_idea}</p>
+                                </div>
+
+                                {/* Summary */}
+                                <div>
+                                    <h3 className="text-lg font-semibold mb-2">Resumen Ejecutivo</h3>
+                                    <p className="text-sm leading-relaxed">{analysis.summary}</p>
+                                </div>
+
+                                {/* Key Insights */}
+                                {analysis.key_insights && analysis.key_insights.length > 0 && (
+                                    <div>
+                                        <h3 className="text-lg font-semibold mb-2">Puntos Clave</h3>
+                                        <ul className="list-disc pl-6 space-y-1">
+                                            {analysis.key_insights.map((insight, i) => (
+                                                <li key={i} className="text-sm">{insight}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+
+                                {/* Decisions */}
+                                {analysis.decisions && analysis.decisions.length > 0 && (
+                                    <div>
+                                        <h3 className="text-lg font-semibold mb-2">Decisiones Tomadas</h3>
+                                        <ul className="list-disc pl-6 space-y-1">
+                                            {analysis.decisions.map((item, i) => (
+                                                <li key={i} className="text-sm">{item}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+
+                                {/* Tasks */}
+                                {tasks && tasks.length > 0 && (
+                                    <div>
+                                        <h3 className="text-lg font-semibold mb-2">Tareas Asignadas</h3>
+                                        <div className="space-y-2">
+                                            {tasks.map((task, i) => (
+                                                <div key={i} className="border-l-2 border-primary pl-3 py-1">
+                                                    <p className="text-sm font-medium">{task.description}</p>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        Responsable: {task.assignee}
+                                                        {task.due_date && ` • Fecha límite: ${new Date(task.due_date).toLocaleDateString('es-ES')}`}
+                                                    </p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Risks */}
+                                {analysis.risks && analysis.risks.length > 0 && (
+                                    <div>
+                                        <h3 className="text-lg font-semibold mb-2">Riesgos Identificados</h3>
+                                        <ul className="list-disc pl-6 space-y-1">
+                                            {analysis.risks.map((item, i) => (
+                                                <li key={i} className="text-sm">{item}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+
+                                {/* Open Questions */}
+                                {analysis.open_questions && analysis.open_questions.length > 0 && (
+                                    <div>
+                                        <h3 className="text-lg font-semibold mb-2">Preguntas Abiertas</h3>
+                                        <ul className="list-disc pl-6 space-y-1">
+                                            {analysis.open_questions.map((item, i) => (
+                                                <li key={i} className="text-sm">{item}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+
+                                {/* Pending Topics */}
+                                {analysis.pending_topics && analysis.pending_topics.length > 0 && (
+                                    <div>
+                                        <h3 className="text-lg font-semibold mb-2">Temas Pendientes</h3>
+                                        <ul className="list-disc pl-6 space-y-1">
+                                            {analysis.pending_topics.map((item, i) => (
+                                                <li key={i} className="text-sm">{item}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                            </div>
+                        </ScrollArea>
+                    </CardContent>
+                </Card>
+            </TabsContent>
 
             <TabsContent value="transcript">
                 <Card>
